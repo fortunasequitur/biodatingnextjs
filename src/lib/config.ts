@@ -133,11 +133,10 @@ export async function fetchConfigFromGoogleSheets(): Promise<ProfileConfig> {
     for (let i = 1; i < rows.length; i++) {
       const [key, value] = rows[i];
       if (key && value) {
-        // Handle array fields (comma-separated values)
-        if (['galleryImages', 'exclusivePhotos', 'exclusiveVideos'].includes(key)) {
-          config[key as keyof ProfileConfig] = value.split(',').map((item: string) => item.trim()) as any;
+        if (key === 'galleryImages' || key === 'exclusivePhotos' || key === 'exclusiveVideos') {
+          (config as any)[key] = value.split(',').map((item: string) => item.trim());
         } else {
-          config[key as keyof ProfileConfig] = value as any;
+          (config as any)[key] = value;
         }
       }
     }
