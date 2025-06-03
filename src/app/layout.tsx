@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { getProfileConfig } from "../lib/config";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/config`, { cache: 'no-store' });
-  const { data } = await res.json();
+  const data = await getProfileConfig();
   return {
     title: data.metaTitle,
     description: data.metaDescription,
