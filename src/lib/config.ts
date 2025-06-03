@@ -134,9 +134,9 @@ export async function fetchConfigFromGoogleSheets(): Promise<ProfileConfig> {
       const [key, value] = rows[i];
       if (key && value) {
         if (key === 'galleryImages' || key === 'exclusivePhotos' || key === 'exclusiveVideos') {
-          (config as any)[key] = value.split(',').map((item: string) => item.trim());
+          (config as Record<string, unknown>)[key] = value.split(',').map((item: string) => item.trim());
         } else {
-          (config as any)[key] = value;
+          (config as Record<string, unknown>)[key] = value;
         }
       }
     }
