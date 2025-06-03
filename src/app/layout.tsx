@@ -1,6 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+export async function generateMetadata(): Promise<Metadata> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/config`, { cache: 'no-store' });
+  const { data } = await res.json();
+  return {
+    title: data.metaTitle,
+    description: data.metaDescription,
+    keywords: data.metaKeywords,
+    openGraph: {
+      title: data.metaTitle,
+      description: data.metaDescription,
+      url: data.canonicalUrl,
+      siteName: 'LinkMe Profile',
+    },
+    alternates: {
+      canonical: data.canonicalUrl,
+    },
+  };
+}
+
 export const metadata: Metadata = {
   title: "Sarah Johnson - Exclusive Content Creator | LinkMe Profile",
   description: "Access exclusive photos and videos from Sarah Johnson. Join thousands of followers for premium content. No CC, No Fake, No Subscribe required.",
@@ -56,10 +75,6 @@ export const metadata: Metadata = {
 
   verification: {
     google: 'google-site-verification-code',
-  },
-
-  alternates: {
-    canonical: 'https://linkme-template.netlify.app',
   },
 
   other: {
