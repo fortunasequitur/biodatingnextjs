@@ -1,11 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, ExternalLink, Globe, MapPin } from 'lucide-react';
 
 export default function ProfilePage() {
+  const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('exclusive-photos');
   const [showFollowerDropdown, setShowFollowerDropdown] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => setProfile(data.data));
+  }, []);
+
+  if (!profile) return <div className="text-center py-10">Loading...</div>;
 
   return (
     <div className="dark-theme min-h-screen">
@@ -14,7 +23,7 @@ export default function ProfilePage() {
         <div className="userProfileImage">
           <div className="overlayopacity" />
           <img
-            src="https://i.imgur.com/XnzUEAy.jpeg"
+            src={profile.profileImage}
             alt="Profile"
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -23,7 +32,7 @@ export default function ProfilePage() {
         {/* Profile Details */}
         <div className="text-center mb-6">
           <div className="profileName justify-center">
-            <h2 className="onPrimaryMain text-xl font-semibold">Sarah Johnson</h2>
+            <h2 className="onPrimaryMain text-xl font-semibold">{profile.name}</h2>
             <svg className="verificationImg" viewBox="0 0 24 24" fill="none">
               <path
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
@@ -35,18 +44,18 @@ export default function ProfilePage() {
               />
             </svg>
           </div>
-          <div className="onPrimaryL2 text-sm mb-2">@sarahcreates</div>
+          <div className="onPrimaryL2 text-sm mb-2">{profile.username}</div>
 
           {/* Location */}
           <div className="flex items-center justify-center gap-1 mb-4">
             <MapPin className="w-4 h-4 onPrimaryL2" />
-            <span className="onPrimaryL2 text-sm">United States</span>
+            <span className="onPrimaryL2 text-sm">{profile.location}</span>
           </div>
 
           {/* Social Media Icons */}
           <div className="flex justify-center gap-3 mb-4">
             <a
-              href="https://wa.me/1234567890"
+              href={profile.whatsappLink}
               className="socialicon"
               target="_blank"
               rel="noreferrer"
@@ -56,7 +65,7 @@ export default function ProfilePage() {
               </svg>
             </a>
             <a
-              href="https://instagram.com/sarahcreates"
+              href={profile.instagramLink}
               className="socialicon"
               target="_blank"
               rel="noreferrer"
@@ -66,7 +75,7 @@ export default function ProfilePage() {
               </svg>
             </a>
             <a
-              href="https://t.me/sarahcreates"
+              href={profile.telegramLink}
               className="socialicon"
               target="_blank"
               rel="noreferrer"
@@ -83,7 +92,7 @@ export default function ProfilePage() {
               className="onPrimaryMain flex items-center gap-2 text-sm font-semibold mb-4 mx-auto"
               onClick={() => setShowFollowerDropdown(!showFollowerDropdown)}
             >
-              <span>125K</span>
+              <span>{profile.totalFollowers}</span>
               <span className="onPrimaryL1">Total Followers</span>
               <ChevronDown className="w-3 h-3" />
             </button>
@@ -92,43 +101,33 @@ export default function ProfilePage() {
 
         {/* Photo Gallery */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="galleryImage aspect-square">
-            <img
-              src="https://i.imgur.com/XnzUEAy.jpeg"
-              alt="Gallery"
-              className="galleryImage w-full h-full"
-            />
-          </div>
-          <div className="galleryImage aspect-square">
-            <img
-              src="https://i.imgur.com/XnzUEAy.jpeg"
-              alt="Gallery"
-              className="galleryImage w-full h-full"
-            />
-          </div>
-          <div className="galleryImage aspect-square">
-            <img
-              src="https://i.imgur.com/XnzUEAy.jpeg"
-              alt="Gallery"
-              className="galleryImage w-full h-full"
-            />
-          </div>
+          {profile.galleryImages && profile.galleryImages.map((img: string, idx: number) => (
+            <div className="galleryImage aspect-square" key={idx}>
+              <img
+                src={img}
+                alt={`Gallery ${idx + 1}`}
+                className="galleryImage w-full h-full"
+              />
+            </div>
+          ))}
         </div>
 
         {/* CTA Button */}
         <div className="mb-4">
-          <button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-            🎉 Access Free Today
-          </button>
+          <a href={profile.ctaButtonLink} target="_blank" rel="noreferrer">
+            <button className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+              {profile.ctaButtonText}
+            </button>
+          </a>
         </div>
 
         {/* 3 Steps Instructions */}
         <div className="text-center mb-6 onPrimaryL1">
-          <p className="text-sm mb-3">⬇️ With 3 Steps ⬇️</p>
+          <p className="text-sm mb-3">{profile.stepsTitle}</p>
           <div className="text-xs space-y-1">
-            <p>1. Sign Up</p>
-            <p>2. Find and Add My Username</p>
-            <p>3. Access Exclusive Content 24 Hours</p>
+            <p>{profile.step1}</p>
+            <p>{profile.step2}</p>
+            <p>{profile.step3}</p>
           </div>
         </div>
 
@@ -156,147 +155,36 @@ export default function ProfilePage() {
           <div className="min-h-[300px]">
             {activeTab === 'exclusive-photos' ? (
               <div className="grid grid-cols-3 gap-3">
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 1"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 2"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 3"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 4"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 5"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Photo 6"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                </div>
+                {profile.exclusivePhotos && profile.exclusivePhotos.map((img: string, idx: number) => (
+                  <div className="galleryImage aspect-square relative" key={idx}>
+                    <img
+                      src={img}
+                      alt={`Exclusive Photo ${idx + 1}`}
+                      className="galleryImage w-full h-full filter blur-sm"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-20" />
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 1"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
+                {profile.exclusiveVideos && profile.exclusiveVideos.map((img: string, idx: number) => (
+                  <div className="galleryImage aspect-square relative" key={idx}>
+                    <img
+                      src={img}
+                      alt={`Exclusive Video ${idx + 1}`}
+                      className="galleryImage w-full h-full filter blur-sm"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-30" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black bg-opacity-50 rounded-full p-3">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 2"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 3"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 4"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 5"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="galleryImage aspect-square relative">
-                  <img
-                    src="https://i.imgur.com/XnzUEAy.jpeg"
-                    alt="Exclusive Video 6"
-                    className="galleryImage w-full h-full filter blur-sm"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-black bg-opacity-50 rounded-full p-3">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
@@ -305,7 +193,7 @@ export default function ProfilePage() {
         {/* Footer */}
         <div className="text-center mt-8 mb-6">
           <div className="mb-4">
-            <a href="https://linkme.bio" target="_blank" rel="noreferrer" className="inline-block">
+            <a href={profile.canonicalUrl} target="_blank" rel="noreferrer" className="inline-block">
               <div className="w-6 h-6 mx-auto mb-2">
                 <svg viewBox="0 0 24 24" className="w-full h-full">
                   <path
@@ -325,20 +213,20 @@ export default function ProfilePage() {
             </a>
           </div>
           <div className="mb-4">
-            <a href="https://linkme.bio/signup" className="onPrimaryMain text-base font-medium">
+            <a href={profile.floatingBannerLink} className="onPrimaryMain text-base font-medium">
               <span className="bgGradient-8">NO CC | NO FAKE | NO SUBSCRIBE</span>
             </a>
           </div>
           <div className="text-xs onPrimaryL2">
-            <a href="https://linkme.bio/privacy" className="hover:text-white transition-colors">
+            <a href={profile.privacyLink} className="hover:text-white transition-colors">
               Privacy
             </a>{' '}
             |{' '}
-            <a href="https://linkme.bio/cookies" className="hover:text-white transition-colors">
+            <a href={profile.cookieNoticeLink} className="hover:text-white transition-colors">
               Cookie Notice
             </a>{' '}
             |{' '}
-            <a href="https://linkme.bio/terms" className="hover:text-white transition-colors">
+            <a href={profile.termsLink} className="hover:text-white transition-colors">
               Terms of Service
             </a>
           </div>
@@ -347,11 +235,11 @@ export default function ProfilePage() {
 
       {/* Floating Banner */}
       <div className="floating-banner">
-        <a href="https://linkme.bio/signup" className="flex items-center justify-between w-full">
+        <a href={profile.floatingBannerLink} className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded bg-gradient-to-r from-blue-500 to-purple-500" />
             <span className="text-sm font-medium text-black">
-              FREE ACCESS FOR YOU 💦🥵
+              {profile.floatingBannerText}
             </span>
           </div>
           <button className="text-gray-500 hover:text-black">

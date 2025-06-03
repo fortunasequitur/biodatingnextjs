@@ -97,16 +97,9 @@ export const defaultConfig: ProfileConfig = {
 
 // Google Sheets configuration
 export const GOOGLE_SHEETS_CONFIG = {
-  // Replace with your Google Sheets ID
-  SHEET_ID: "YOUR_GOOGLE_SHEET_ID_HERE",
-
-  // Replace with your Google Sheets API key
-  API_KEY: "YOUR_GOOGLE_SHEETS_API_KEY_HERE",
-
-  // Sheet name (tab name in your Google Sheet)
+  SHEET_ID: "1cglM3H3K_xBvxJHadfMvqZWvzrUsa9_hlVuL-2y1-gI",
+  API_KEY: "AIzaSyAvN2c8NQ2EQTHM48Wo-fFnDdT_dIMevxM",
   SHEET_NAME: "ProfileConfig",
-
-  // Cache duration in milliseconds (5 minutes)
   CACHE_DURATION: 5 * 60 * 1000,
 };
 
@@ -120,9 +113,7 @@ export async function fetchConfigFromGoogleSheets(): Promise<ProfileConfig> {
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/values/${GOOGLE_SHEETS_CONFIG.SHEET_NAME}?key=${GOOGLE_SHEETS_CONFIG.API_KEY}`;
 
-    const response = await fetch(url, {
-      next: { revalidate: GOOGLE_SHEETS_CONFIG.CACHE_DURATION / 1000 } // Next.js cache
-    });
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch from Google Sheets: ${response.statusText}`);
@@ -160,25 +151,7 @@ export async function fetchConfigFromGoogleSheets(): Promise<ProfileConfig> {
   }
 }
 
-// In-memory cache for configuration
-let cachedConfig: ProfileConfig | null = null;
-let cacheTimestamp: number = 0;
-
-// Function to get configuration with caching
+// Function to always get fresh configuration (no cache)
 export async function getProfileConfig(): Promise<ProfileConfig> {
-  const now = Date.now();
-
-  // Return cached config if still valid
-  if (cachedConfig && (now - cacheTimestamp) < GOOGLE_SHEETS_CONFIG.CACHE_DURATION) {
-    return cachedConfig;
-  }
-
-  // Fetch new config
-  const config = await fetchConfigFromGoogleSheets();
-
-  // Update cache
-  cachedConfig = config;
-  cacheTimestamp = now;
-
-  return config;
+  return await fetchConfigFromGoogleSheets();
 }
